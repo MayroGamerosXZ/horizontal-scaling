@@ -1,20 +1,28 @@
+version: '3.8' # Asegúrate de usar una versión que soporte deploy
+
 services:
+  app:
+    build: ./src
+    # ESCALAMIENTO HORIZONTAL: 3 instancias de la app Node.js
+    deploy:
+      replicas: 3
+    # Nota: Asegúrate de que el servicio 'app' no tenga puertos fijos expuestos al host (ej. ports: -"8000:8000") 
+    # ya que habría colisión. Nginx se encargará de enrutar el tráfico.
+
   nginx:
     image: nginx:latest
     ports:
-      - "3000:80"
+      - "8080:80"
     volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - web
-
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/app
-    working_dir: /app
-    command: node src/server.js
+      - app
+    # ESCALAMIENTO VERTICAL: Asignación de recursos específicos
     deploy:
-      replicas: 3
+      resources:
+        limits:
+          cpus: '0.50'     # Límite máximo: Nivel de CPU (medio núcleo)
+          memory: 512M     # Límite máximo: 512 Megabytes de RAM
+        reservations:
+          cpus: '0.25'     # Recursos garantizados
+          memory: 256M
