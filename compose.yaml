@@ -2,12 +2,10 @@ version: '3.8' # Asegúrate de usar una versión que soporte deploy
 
 services:
   app:
-    build: ./src
-    # ESCALAMIENTO HORIZONTAL: 3 instancias de la app Node.js
+    build: .   # <-- ¡Cambia ./src por un punto!
     deploy:
       replicas: 3
-    # Nota: Asegúrate de que el servicio 'app' no tenga puertos fijos expuestos al host (ej. ports: -"8000:8000") 
-    # ya que habría colisión. Nginx se encargará de enrutar el tráfico.
+
 
   nginx:
     image: nginx:latest
